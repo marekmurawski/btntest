@@ -1,0 +1,37 @@
+Marek\ArticlesBundle\Entity\Image:
+    type: entity
+    table: Image
+    id:
+        id:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        path:
+            type: string
+            nullable: true
+            length: 255
+            fixed: false
+        originalName:
+            type: string
+            nullable: true
+            length: 255
+            fixed: false
+            column: original_name
+    manyToOne:
+        article:
+            targetEntity: Article
+            inversedBy: images
+            joinColumn:
+                name: article_id
+                referencedColumnName: id
+                onDelete: CASCADE
+    lifecycleCallbacks:
+        postRemove: [removeUpload]
+        postPersist: [upload]
+        postUpdate: [upload]
+        prePersist: [preUpload]
+        preUpdate:  [preUpload]

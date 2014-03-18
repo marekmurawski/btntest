@@ -1,0 +1,86 @@
+{% extends 'MarekArticlesBundle::layout.html.twig' %}
+{% block body %}
+    {% set currentFilters = { } %}
+
+    <a class="btn btn-success" href="{{ path('marek_article_add') }}">{{ 'Dodaj artykul' }}</a>
+
+
+    <h2>{{ 'Artykuły' }}</h2>
+
+<table class="table">
+    <thead>
+    <th>{{ 'Nazwa' }}</th>
+    <th>{{ 'Data dodania' }}</th>
+    <th>{{ 'Aktywny' }}</th>
+    <th>{{ 'Akcje' }}</th>
+    </thead>
+    <tbody>
+    {% for article in articles %}
+        <tr>
+            <td>
+                <a href="{{ path('marek_article_preview',{'id':article.id}) }}">{{ article.name }}</a>
+                {{ article.id }}
+            </td>
+            <td>{{ article.createdOn|date("d/m/Y") }}</td>
+            <td>
+                {% if article.active %}
+                    <a href="#" class="switch-active btn btn-success btn-xs" data-id="{{ article.id }}">tak</a>
+                {% else %}
+                    <a href="#" class="switch-active btn btn-default btn-xs" data-id="{{ article.id }}">nie</a>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{{ path('marek_article_edit',{'id':article.id}) }}">
+                    <span class="glyphicon glyphicon-pencil"></span>
+                    {{ 'edytuj' }}
+                </a>
+                <a href="{{ path('marek_article_delete',{'id':article.id}|merge({page: pagination.currentPage})) }}" class="text-danger">
+                    <span class="glyphicon glyphicon-remove-circle"></span>
+                    {{ 'usuń' }}
+                </a>
+                <a href="{{ path('marek_article_move',{'id':article.id, 'direction':'up'}|merge({page: pagination.currentPage})) }}">
+                    <span class="glyphicon glyphicon-chevron-up"></span>
+                </a>
+                <a href="{{ path('marek_article_move',{'id':article.id, 'direction':'down'}|merge({page: pagination.currentPage})) }}">
+                    <span class="glyphicon glyphicon-chevron-down"></span>
+                </a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% include 'MarekArticlesBundle:Articles:_pagination.html.twig' with {'pagination': pagination} %}
+    <script>
+        $(document).ready(function(jQuery){
+            var $ = jQuery;
+
+            $('a.switch-active').click(function(){
+                var $btn = $(this);
+                $btn.html('ajax...');
+                var artId = $btn.attr('data-id');
+                var request = $.ajax({
+                    url: "{{ path('marek_article_switch_active')|escape }}",
+                    type: "POST",
+                    data: { id : artId },
+                    dataType: "json"
+                });
+
+                request.done(function( msg ) {
+                    if (msg.hasOwnProperty('active') && msg.active) {
+                        $btn.removeClass('btn-default');
+                        $btn.addClass('btn-success');
+                        $btn.html('tak');
+                    } else {
+                        $btn.addClass('btn-default');
+                        $btn.removeClass('btn-success');
+                        $btn.html('nie');
+                    }
+                });
+
+                request.fail(function( jqXHR, textStatus ) {
+                    alert( "Request failed: " + textStatus );
+                });
+            });
+        })
+    </script>
+{% endblock %}

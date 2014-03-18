@@ -1,0 +1,42 @@
+{% extends 'MarekArticlesBundle::layout.html.twig' %}
+
+{% block body %}
+    <div class="row">
+
+    <form class="form col-sm-4 col-sm-offset-4" action="{{ path("_security_check") }}" method="post" id="login">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                {% if error %}
+                    <div class="alert alert-danger">{{ error.message }}</div>
+                {% endif %}
+
+                <div>
+                    <label for="username">Login</label>
+                    <input class="form-control" type="text" id="username" name="_username" value="{{ last_username }}" />
+                </div>
+
+                <div>
+                    <label for="password">Hasło</label>
+                    <input class="form-control" type="password" id="password" name="_password" />
+                </div>
+            </div>
+            <div class="panel-footer">
+                <button type="submit" class="btn btn-primary">
+                    Zaloguj
+                </button>
+            </div>
+        </div>
+    </form>
+    </div>
+
+    <div class="row">
+        <p class="text-muted">
+            Domyślny użytkownicy:
+        </p>
+        <ul class="text-muted">
+            <li><em>user/userpass</em> <small>(ROLE_USER)</small></li>
+            <li><em>admin/adminpass</em> <small>(ROLE_ADMIN)</small></li>
+        </ul>
+    </div>
+
+{% endblock %}

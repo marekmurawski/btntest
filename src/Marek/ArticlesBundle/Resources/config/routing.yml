@@ -1,0 +1,12 @@
+_welcome:
+    pattern:  /
+    defaults: { _controller: MarekArticlesBundle:Welcome:index }
+marek_articles:
+    resource: "@MarekArticlesBundle/Controller/ArticlesController.php"
+    type:     annotation
+marek_images:
+    resource: "@MarekArticlesBundle/Controller/ImagesController.php"
+    type:     annotation
+_secured:
+    resource: "@MarekArticlesBundle/Controller/SecuredController.php"
+    type:     annotation

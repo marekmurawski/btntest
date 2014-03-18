@@ -1,0 +1,25 @@
+{% extends 'MarekArticlesBundle::layout.html.twig' %}
+{% block body %}
+    <a class="btn btn-default" href="{{ path('marek_articles_index') }}">{{ 'Powrót' }}</a>
+    <h1>{{ article.name }}</h1>
+    <div>
+        {{ article.description }}
+    </div>
+    <h3>{{ 'Galeria' }}</h3>
+    {% for image in images %}
+        <a class="fancybox" rel="gallery1" href="/{{ image.getWebPath() | escape }}"
+           title="{{ image.originalName|escape }}">
+            <img src="{{ image.getWebPath() | apply_filter('my_thumb') }}" alt="" />
+        </a>
+    {% endfor %}
+{% endblock %}
+{% block scripts %}
+    <script>
+        $(document).ready(function() {
+            $(".fancybox").fancybox({
+                openEffect	: 'none',
+                closeEffect	: 'none'
+            });
+        });
+    </script>
+{% endblock %}

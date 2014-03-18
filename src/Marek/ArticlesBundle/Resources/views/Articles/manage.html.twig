@@ -1,0 +1,131 @@
+{% extends 'MarekArticlesBundle::layout.html.twig' %}
+{% block body %}
+    <a class="btn btn-default" href="{{ path('marek_articles_index') }}">{{ 'Powrót' }}</a>
+    {% if editing is defined and editing %}
+        <h1>{{ 'Edycja artykułu' }}</h1>
+        {% set action='marek_article_update' %}
+        {% set action_params={'id':article.id} %}
+        {% set save_label = 'Zapisz' %}
+        {% set save_and_continue_label = 'Zapisz i kontynuuj edycję' %}
+    {% else %}
+        <h1>{{ 'Nowy artykuł' }}</h1>
+        {% set action='marek_article_store' %}
+        {% set action_params={} %}
+        {% set save_label = 'Dodaj' %}
+        {% set save_and_continue_label = 'Dodaj i kontynuuj edycję' %}
+    {% endif %}
+
+{# html5 browser validation diabled NOVALIDATE#}
+
+<form method="post" action="{{ path(action,action_params) }}" class="form" novalidate {{ form_enctype(form) }}>
+    {# NAME #}
+    <div class="form-group">
+        {{ form_label(form.name,'Nazwa') }}
+        {{ form_errors(form.name) }}
+        {{ form_widget(form.name,{'attr': {'class': 'form-control'}}) }}
+    </div>
+
+    {# DESCRIPTION #}
+    <div class="form-group">
+        {{ form_label(form.description,'Opis') }}
+        {{ form_errors(form.description) }}
+        {{ form_widget(form.description,{'attr': {'class': 'form-control'}}) }}
+    </div>
+
+    {# ACTIVE STATE #}
+    <div class="checkbox">
+        <label>
+            {{ form_widget(form.active) }} Aktywny?
+        </label>
+    </div>
+
+    {# ATTACHED IMAGES #}
+    <div class="well">
+
+        {% if images is defined %}
+            {% for image in images %}
+                <div>
+                    <a href="#" class="image-delete" data-id={{ image.id }}>
+                        <span class="glyphicon glyphicon-remove-circle text-danger"></span>
+                    </a>
+                    <a class="fancybox" rel="gallery1" href="/{{ image.getWebPath() | escape }}" title="{{ image.originalName|escape }}">
+                        {{ image.originalName }}
+                    </a>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if editing is defined and editing %}
+            <h5>{{ 'Dodaj więcej zdjęć (można wybrać kilka na raz)' }}</h5>
+        {% else %}
+            <h5>{{ 'Dodaj zdjęcia (można wybrać kilka na raz)' }}</h5>
+        {% endif %}
+
+        {# multiple-upload Input #}
+        {{ form_widget(form.images, { 'full_name': form.images.vars.full_name ~ '[]' }) }}
+
+        {# IMAGE VALIDATION ERRORS #}
+        {% if file_errors is defined and file_errors %}
+            <div class="text-danger">
+                Nie udało się przesłać niektórych plików
+            {% for error in file_errors %}
+                    <div class="text-warning">
+                        <strong>{{ error.file }}</strong>
+                        {{ error.messages|join }}</div>
+
+            {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    {# BUTTONS #}
+    <div>
+        {{ form_widget(form.save,{
+        'label': save_label,
+        'attr' : {'class': 'btn btn-success'}
+        }) }}
+        {{ form_widget(form.save_and_continue,{
+        'label':save_and_continue_label,
+        'attr' : {'class': 'btn btn-default'}
+        }) }}
+        {{ form_widget(form.reset,{'attr': {'class': 'btn btn-danger'}}) }}
+    </div>
+    {{ form_end(form) }}
+
+    {% endblock %}
+
+
+
+    {% block scripts %}
+    <script>
+        $(document).ready(function(jQuery){
+            var $ = jQuery;
+
+            $('a.image-delete').click(function(){
+                var $that = $(this);
+                var artId = $(this).attr('data-id');
+                var request = $.ajax({
+                    url: "{{ path('marek_image_delete')|escape }}",
+                    type: "POST",
+                    data: { id : artId },
+                    dataType: "json"
+                });
+
+                request.done(function( msg ) {
+                    $that.parent().remove();
+                });
+
+                request.fail(function( jqXHR, textStatus ) {
+                    alert( "Request failed: " + textStatus );
+                });
+
+
+            });
+
+            $(".fancybox").fancybox({
+                openEffect	: 'none',
+                closeEffect	: 'none'
+            });
+        })
+    </script>
+{% endblock %}

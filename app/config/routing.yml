@@ -1,0 +1,8 @@
+marek_articles:
+    resource: "@MarekArticlesBundle/Resources/config/routing.yml"
+    prefix:   /
+
+_imagine:
+    resource: .
+    type:     imagine
+

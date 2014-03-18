@@ -1,0 +1,7 @@
+parameters:
+#    marek_articles.example.class: Marek\ArticlesBundle\Example
+
+services:
+#    marek_articles.example:
+#        class: %marek_articles.example.class%
+#        arguments: [@service_id, "plain_value", %parameter%]

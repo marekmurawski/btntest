@@ -1,0 +1,38 @@
+Marek\ArticlesBundle\Entity\Article:
+    type: entity
+#    repositoryClass: Marek\ArticlesBundle\Entity\ArticleRepository
+    table: Article
+    id:
+        id:
+            type: integer
+            nullable: false
+            unsigned: false
+            comment: ''
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: false
+            length: 255
+        description:
+            type: text
+            nullable: true
+        active:
+            type: boolean
+            nullable: false
+        position:
+            type: integer
+            nullable: false
+            unsigned: false
+        createdOn:
+            type: datetime
+            nullable: false
+            column: created_on
+    oneToMany:
+        images:
+            targetEntity: Image
+            mappedBy: article
+    lifecycleCallbacks:
+        prePersist: [setCreatedOnValue]

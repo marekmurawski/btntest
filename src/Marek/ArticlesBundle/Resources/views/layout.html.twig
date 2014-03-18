@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>{% block title %}Articles application{% endblock %}</title>
+
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ asset('/js/fancybox/jquery.fancybox.css') }}">
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="{{ asset('/js/fancybox/jquery.fancybox.pack.js') }}"></script>
+</head>
+<body>
+    {% include 'MarekArticlesBundle::_navbar.html.twig' %}
+<div class="container" role="main" id="body">
+    {% for message in app.session.flashbag.get('messages') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% for error in app.session.flashbag.get('errors') %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+    {% endfor %}
+
+    {% block body %}{% endblock %}
+</div>
+{% block scripts %}{% endblock %}
+</body>
+</html>
