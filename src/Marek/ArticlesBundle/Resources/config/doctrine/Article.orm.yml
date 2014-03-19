@@ -34,5 +34,6 @@ Marek\ArticlesBundle\Entity\Article:
         images:
             targetEntity: Image
             mappedBy: article
+            cascade: [remove]
     lifecycleCallbacks:
         prePersist: [setCreatedOnValue]

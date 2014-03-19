@@ -237,11 +237,25 @@ class ArticlesController extends Controller
     {
         if ($article) {
             $em = $this->getDoctrine()->getManager();
+
+            /*
+             * Not needed - handled by
+             * cascade: [remove] in Article.orm.yml
+             *
+            $deletedImages = 0;
+            foreach ($article->getImages() as $articleImage) {
+                $em->remove($articleImage);
+                $deletedImages++;
+            }
+            */
+
             $em->remove($article);
             $em->flush();
+
             $this->get('session')->getFlashBag()->add(
                 'messages',
-                'Artykuł "' . $article->getName() . '" został usunięty!'
+                'Artykuł "' . $article->getName() . '" został usunięty! '
+                // . 'Miał '. $deletedImages . ' zdjęć.'
             );
 
         } else {
