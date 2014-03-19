@@ -2,54 +2,68 @@
 {% block body %}
     {% set currentFilters = { } %}
 
-    <a class="btn btn-success" href="{{ path('marek_article_add') }}">{{ 'Dodaj artykul' }}</a>
-
+    <a class="btn btn-success" href="{{ path('marek_article_add') }}">
+        <span class="glyphicon glyphicon-plus-sign"></span>
+        {{ 'Dodaj artykuł' }}
+    </a>
 
     <h2>{{ 'Artykuły' }}</h2>
 
-<table class="table">
-    <thead>
-    <th>{{ 'Nazwa' }}</th>
-    <th>{{ 'Data dodania' }}</th>
-    <th>{{ 'Aktywny' }}</th>
-    <th>{{ 'Akcje' }}</th>
-    </thead>
-    <tbody>
-    {% for article in articles %}
-        <tr>
-            <td>
-                <a href="{{ path('marek_article_preview',{'id':article.id}) }}">{{ article.name }}</a>
-                {{ article.id }}
-            </td>
-            <td>{{ article.createdOn|date("d/m/Y") }}</td>
-            <td>
-                {% if article.active %}
-                    <a href="#" class="switch-active btn btn-success btn-xs" data-id="{{ article.id }}">tak</a>
-                {% else %}
-                    <a href="#" class="switch-active btn btn-default btn-xs" data-id="{{ article.id }}">nie</a>
-                {% endif %}
-            </td>
-            <td>
-                <a href="{{ path('marek_article_edit',{'id':article.id}) }}">
-                    <span class="glyphicon glyphicon-pencil"></span>
-                    {{ 'edytuj' }}
-                </a>
-                <a href="{{ path('marek_article_delete',{'id':article.id}|merge({page: pagination.currentPage})) }}" class="text-danger">
-                    <span class="glyphicon glyphicon-remove-circle"></span>
-                    {{ 'usuń' }}
-                </a>
-                <a href="{{ path('marek_article_move',{'id':article.id, 'direction':'up'}|merge({page: pagination.currentPage})) }}">
-                    <span class="glyphicon glyphicon-chevron-up"></span>
-                </a>
-                <a href="{{ path('marek_article_move',{'id':article.id, 'direction':'down'}|merge({page: pagination.currentPage})) }}">
-                    <span class="glyphicon glyphicon-chevron-down"></span>
-                </a>
-            </td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
-{% include 'MarekArticlesBundle:Articles:_pagination.html.twig' with {'pagination': pagination} %}
+    <table class="table table-hover">
+        <thead>
+        <th style="width: 50%">{{ 'Nazwa' }}</th>
+        <th style="width: 20%">{{ 'Data dodania' }}</th>
+        <th style="width: 10%">{{ 'Aktywny' }}</th>
+        <th style="width: 20%" class="text-right">{{ 'Akcje' }}</th>
+        </thead>
+        <tbody>
+        {% for article in articles %}
+            {# KEEP TRACK OF ITEM'S INDEX to check if we can move #}
+            {% set itemNo = loop.index+(pagination.currentPage-1)*pagination.limit %}
+            <tr>
+                <td>
+                    <a href="{{ path('marek_article_preview',{'id':article.id}) }}">{{ article.name }}</a>
+                    <small class="text-muted">[{{ article.id }}]</small>
+                </td>
+                <td>{{ article.createdOn|date("d/m/Y") }}</td>
+                <td>
+                    {% if article.active %}
+                        <a href="#" class="switch-active btn btn-success btn-xs" data-id="{{ article.id }}">tak</a>
+                    {% else %}
+                        <a href="#" class="switch-active btn btn-default btn-xs" data-id="{{ article.id }}">nie</a>
+                    {% endif %}
+                </td>
+                <td class="text-right">
+                    <a class="btn btn-primary btn-xs" href="{{ path('marek_article_edit',{'id':article.id}) }}">
+                        <span class="glyphicon glyphicon-pencil"></span>
+                        {{ 'edytuj' }}
+                    </a>
+                    <a class="btn btn-danger btn-xs" href="{{ path('marek_article_delete',{'id':article.id}|merge({page: pagination.currentPage})) }}" class="text-danger">
+                        <span class="glyphicon glyphicon-remove-circle"></span>
+                        {{ 'usuń' }}
+                    </a>
+                    {% spaceless %}
+                        {% if itemNo > 1 %}
+                            <a href="{{ path('marek_article_move',{'id':article.id, 'direction':'up'}|merge({page: pagination.currentPage})) }}">
+                                <span class="glyphicon glyphicon-chevron-up"></span>
+                            </a>
+                        {% else %}
+                                <span class="glyphicon glyphicon-chevron-up text-muted"></span>
+                        {% endif %}
+                        {% if itemNo < pagination.total %}
+                            <a href="{{ path('marek_article_move',{'id':article.id, 'direction':'down'}|merge({page: pagination.currentPage})) }}">
+                                <span class="glyphicon glyphicon-chevron-down"></span>
+                            </a>
+                        {% else %}
+                                <span class="glyphicon glyphicon-chevron-down text-muted"></span>
+                        {% endif %}
+                    {% endspaceless %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% include 'MarekArticlesBundle:Articles:_pagination.html.twig' with {'pagination': pagination} %}
     <script>
         $(document).ready(function(jQuery){
             var $ = jQuery;
