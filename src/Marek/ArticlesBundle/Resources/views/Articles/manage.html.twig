@@ -1,6 +1,25 @@
 {% extends 'MarekArticlesBundle::layout.html.twig' %}
+
+{# OVERRIDE FORM_ERRORS FOR CUSTOM COLOR#}
+{% form_theme form _self %}
+{% block form_errors %}
+    {% spaceless %}
+        {% if errors|length > 0 %}
+            <ul class="text-danger">
+                {% for error in errors %}
+                    <li>{{ error.message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endspaceless %}
+{% endblock form_errors %}
+
 {% block body %}
-    <a class="btn btn-default" href="{{ path('marek_articles_index') }}">{{ 'Powrót' }}</a>
+    <a class="btn btn-default" href="{{ path('marek_articles_index') }}">
+        <span class="glyphicon glyphicon-chevron-left"></span> {{ 'Powrót' }}
+    </a>
+
+    {# DEFINE VARIABLES FOR CREATE/EDIT MODE #}
     {% if editing is defined and editing %}
         <h1>{{ 'Edycja artykułu' }}</h1>
         {% set action='marek_article_update' %}
@@ -16,20 +35,20 @@
     {% endif %}
 
 {# html5 browser validation diabled NOVALIDATE#}
-
-<form method="post" action="{{ path(action,action_params) }}" class="form" novalidate {{ form_enctype(form) }}>
+<form method="post" action="{{ path(action,action_params) }}" class="form form-horizontal" novalidate {{ form_enctype(form) }}>
     {# NAME #}
+
     <div class="form-group">
         {{ form_label(form.name,'Nazwa') }}
-        {{ form_errors(form.name) }}
         {{ form_widget(form.name,{'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.name) }}
     </div>
 
     {# DESCRIPTION #}
     <div class="form-group">
         {{ form_label(form.description,'Opis') }}
-        {{ form_errors(form.description) }}
         {{ form_widget(form.description,{'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.description) }}
     </div>
 
     {# ACTIVE STATE #}
@@ -41,14 +60,13 @@
 
     {# ATTACHED IMAGES #}
     <div class="well">
-
         {% if images is defined %}
             {% for image in images %}
                 <div>
                     <a href="#" class="image-delete" data-id={{ image.id }}>
                         <span class="glyphicon glyphicon-remove-circle text-danger"></span>
                     </a>
-                    <a class="fancybox" rel="gallery1" href="/{{ image.getWebPath() | escape }}" title="{{ image.originalName|escape }}">
+                    <a class="fancybox" rel="gallery1" href="/{{ image.getWebPath()|escape }}" title="{{ image.originalName|escape }}">
                         {{ image.originalName }}
                     </a>
                 </div>
@@ -67,12 +85,12 @@
         {# IMAGE VALIDATION ERRORS #}
         {% if file_errors is defined and file_errors %}
             <div class="text-danger">
-                Nie udało się przesłać niektórych plików
+                Nie udało się przesłać niektórych plików:
             {% for error in file_errors %}
                     <div class="text-warning">
-                        <strong>{{ error.file }}</strong>
-                        {{ error.messages|join }}</div>
-
+                        <strong>{{ error.file }}</strong>:
+                        {{ error.messages|join }}
+                    </div>
             {% endfor %}
             </div>
         {% endif %}
@@ -83,12 +101,16 @@
         {{ form_widget(form.save,{
         'label': save_label,
         'attr' : {'class': 'btn btn-success'}
-        }) }}
+        })
+        }}
+
         {{ form_widget(form.save_and_continue,{
-        'label':save_and_continue_label,
-        'attr' : {'class': 'btn btn-default'}
+        'label': save_and_continue_label,
+        'attr' : {'class': 'btn btn-primary'}
         }) }}
+
         {{ form_widget(form.reset,{'attr': {'class': 'btn btn-danger'}}) }}
+
     </div>
     {{ form_end(form) }}
 
@@ -96,7 +118,7 @@
 
 
 
-    {% block scripts %}
+{% block scripts %}
     <script>
         $(document).ready(function(jQuery){
             var $ = jQuery;

@@ -1,6 +1,8 @@
 {% extends 'MarekArticlesBundle::layout.html.twig' %}
 {% block body %}
-    <a class="btn btn-default" href="{{ path('marek_articles_index') }}">{{ 'Powrót' }}</a>
+    <a class="btn btn-default" href="{{ path('marek_articles_index') }}">
+        <span class="glyphicon glyphicon-chevron-left"></span> {{ 'Powrót' }}
+    </a>
     <h1>{{ article.name }}</h1>
     <div>
         {{ article.description }}
@@ -9,7 +11,7 @@
     {% for image in images %}
         <a class="fancybox" rel="gallery1" href="/{{ image.getWebPath() | escape }}"
            title="{{ image.originalName|escape }}">
-            <img src="{{ image.getWebPath() | apply_filter('my_thumb') }}" alt="" />
+            <img class="img-thumbnail" src="{{ image.getWebPath() | apply_filter('my_thumb') }}" alt="" />
         </a>
     {% endfor %}
 {% endblock %}
