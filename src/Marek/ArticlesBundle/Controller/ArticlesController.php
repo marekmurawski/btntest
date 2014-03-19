@@ -7,17 +7,18 @@ use Marek\ArticlesBundle\Entity\Article;
 use Marek\ArticlesBundle\Entity\Image;
 use Marek\ArticlesBundle\Form\ArticleType;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @Route("/articles")
@@ -39,7 +40,7 @@ class ArticlesController extends Controller
         $pagination['limit'] = 5;
         $pagination['currentPage'] = (int) $request->query->get('page') ?: 1;
         $pagination['offset'] = ($pagination['currentPage'] - 1) * $pagination['limit'];
-        $pagination['total'] = $qb->getQuery()->getSingleScalarResult();
+        $pagination['total'] = (int) $qb->getQuery()->getSingleScalarResult();
         $pagination['lastPage'] = ceil($pagination['total']/$pagination['limit']);
 
         // Retrieve Articles
@@ -59,13 +60,12 @@ class ArticlesController extends Controller
      * @Route("/add", name="marek_article_add")
      * @Method({"GET"})
      */
-    public function addAction(Request $request)
+    public function addAction()
     {
-        $frm = $this->createForm(new ArticleType());
-        $frm->handleRequest($request);
+        $form = $this->createForm(new ArticleType());
 
         return $this->render('MarekArticlesBundle:Articles:manage.html.twig', array(
-            'form' => $frm->createView(),
+            'form' => $form->createView(),
             'editing' => false
         ));
     }
@@ -139,16 +139,12 @@ class ArticlesController extends Controller
      * Just show the edit form
      *
      * @Route("/edit/{id}", name="marek_article_edit")
+     * @ParamConverter("article", class="MarekArticlesBundle:Article")
      * @Method({"GET"})
      */
-    public function editAction(Request $request, $id)
+    public function editAction(Request $request, Article $article)
     {
-        $article = $this->getDoctrine()
-            ->getRepository('MarekArticlesBundle:Article')
-            ->find($id);
-
         $form = $this->createForm(new ArticleType(),$article);
-
         $images = $article->getImages();
 
         return $this->render('MarekArticlesBundle:Articles:manage.html.twig', array(
@@ -161,16 +157,12 @@ class ArticlesController extends Controller
 
     /**
      * @Route("/edit/{id}", name="marek_article_update")
+     * @ParamConverter("article", class="MarekArticlesBundle:Article")
      * @Method({"POST"})
      */
-    public function updateAction(Request $request, $id)
+    public function updateAction(Request $request, Article $article)
     {
-
         $em = $this->getDoctrine()->getManager();
-
-        $article = $this->getDoctrine()
-            ->getRepository('MarekArticlesBundle:Article')
-            ->find($id);
 
         if ($article) {
             $images = $article->getImages();
@@ -199,6 +191,7 @@ class ArticlesController extends Controller
                     'Zmiany w artykule zapisane!'
                 );
 
+                // Decide where to go based on clicked button
                 if ($form->get('save_and_continue')->isClicked()) {
                     return $this->redirect($this->generateUrl('marek_article_edit',array(
                         'id' => $article->getId()
@@ -226,15 +219,11 @@ class ArticlesController extends Controller
      * Display the preview page
      *
      * @Route("/preview/{id}", name="marek_article_preview")
+     * @ParamConverter("article", class="MarekArticlesBundle:Article")
      */
-    public function previewAction($id)
+    public function previewAction(Article $article)
     {
-        $article = $this->getDoctrine()
-            ->getRepository('MarekArticlesBundle:Article')
-            ->find($id);
-
         $images = $article->getImages();
-
         return $this->render('MarekArticlesBundle:Articles:preview.html.twig', compact('article','images'));
     }
 
@@ -242,13 +231,10 @@ class ArticlesController extends Controller
      * Remove article
      *
      * @Route("/delete/{id}", name="marek_article_delete")
+     * @ParamConverter("article", class="MarekArticlesBundle:Article")
      */
-    public function deleteAction(Request $request,$id)
+    public function deleteAction(Request $request, Article $article)
     {
-        $article = $this->getDoctrine()
-            ->getRepository('MarekArticlesBundle:Article')
-            ->find($id);
-
         if ($article) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($article);
@@ -261,7 +247,7 @@ class ArticlesController extends Controller
         } else {
             $this->get('session')->getFlashBag()->add(
                 'errors',
-                "Artykuł o id=$id nie został znaleziony!"
+                "Artykuł nie został znaleziony!"
             );
         }
         return $this->redirect($this->generateUrl('marek_articles_index',
@@ -274,15 +260,11 @@ class ArticlesController extends Controller
      * Move article by swapping it's position with neighbour
      *
      * @Route("/move/{id}/{direction}", name="marek_article_move")
+     * @ParamConverter("article", class="MarekArticlesBundle:Article")
      */
-    public function moveAction(Request $request, $id, $direction)
+    public function moveAction(Request $request, Article $article, $direction)
     {
         $em = $this->getDoctrine()->getManager();
-
-        // Get the base article
-        $article = $this->getDoctrine()
-            ->getRepository('MarekArticlesBundle:Article')
-            ->find($id);
 
         // Prepare options
         if ($direction==='down') {
@@ -295,10 +277,7 @@ class ArticlesController extends Controller
             die('Invalid direction');
         }
 
-
         $art1pos = $article->getPosition();
-
-        //print_r($article->getPosition());
 
         $query = $em->createQuery('SELECT a FROM MarekArticlesBundle:Article a WHERE a.position '
             . $dirOperator // $dirOperator is safe
@@ -309,11 +288,16 @@ class ArticlesController extends Controller
         // Get the neighbour article
         // and if it's found, swap the articles' positions
         if ($swapArticle = $query->getOneOrNullResult()) {
+
+            // get position of neighbour article
             $art2pos = $swapArticle->getPosition();
+            // swap
             $swapArticle->setPosition($art1pos);
             $article->setPosition($art2pos);
+            // persist
             $em->persist($article);
             $em->persist($swapArticle);
+            // commit
             $em->flush();
         }
 
@@ -330,6 +314,7 @@ class ArticlesController extends Controller
      */
     public function switchActiveAction(Request $request)
     {
+
         if ($request->isXmlHttpRequest()) {
             $em = $this->getDoctrine()->getManager();
             $id = $request->request->get('id');
