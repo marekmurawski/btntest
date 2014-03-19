@@ -7,6 +7,6 @@ marek_articles:
 marek_images:
     resource: "@MarekArticlesBundle/Controller/ImagesController.php"
     type:     annotation
-_secured:
-    resource: "@MarekArticlesBundle/Controller/SecuredController.php"
-    type:     annotation
+#_secured:
+#    resource: "@MarekArticlesBundle/Controller/SecuredController.php"
+#    type:     annotation

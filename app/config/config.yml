@@ -4,7 +4,7 @@ imports:
 
 framework:
     #esi:             ~
-    #translator:      { fallback: "%locale%" }
+    translator:      { fallback: "%locale%" }
     secret:          "%secret%"
     router:
         resource: "%kernel.root_dir%/config/routing.yml"
@@ -74,3 +74,8 @@ avalanche_imagine:
         my_thumb:
             type:    thumbnail
             options: { size: [150, 150], mode: outbound, quality: 90, format: jpg }
+
+fos_user:
+    db_driver: orm
+    firewall_name: main
+    user_class: Marek\UserBundle\Entity\User
